@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f2ff">
+    <title>Seven Senses — An Interactive Explorer</title>
+    <style>
+        :root {
+            color: #24233d;
+            background: #f5f2ff;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            font-synthesis: none;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-optical-sizing: auto;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(ellipse at 10% 0%, #e6deff 0, transparent 34rem),
+                radial-gradient(ellipse at 100% 24%, #dff4ef 0, transparent 30rem),
+                #f8f7fc;
+        }
+
+        button {
+            color: inherit;
+            font: inherit;
+        }
+
+        .page {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+            padding: 48px 28px 72px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: end;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .eyebrow {
+            margin: 0 0 12px;
+            color: #7562b0;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 12px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.6rem, 7vw, 4.7rem);
+            font-weight: 500;
+            letter-spacing: -0.055em;
+            line-height: 0.99;
+        }
+
+        .hero-copy {
+            max-width: 640px;
+            margin-bottom: 0;
+            color: #69677b;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .count {
+            margin: 0 0 7px;
+            color: #77748a;
+            font-size: 0.86rem;
+            text-align: right;
+        }
+
+        .count strong {
+            color: #6251a0;
+            font-size: 1.5rem;
+        }
+
+        .sense-list {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 10px;
+            margin: 0 0 18px;
+        }
+
+        .sense-tab {
+            display: grid;
+            min-height: 88px;
+            justify-items: center;
+            align-content: center;
+            gap: 5px;
+            padding: 10px 6px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid #e8e4f2;
+            border-radius: 17px;
+            cursor: pointer;
+            transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .sense-tab:hover {
+            transform: translateY(-2px);
+            border-color: #b7a9e3;
+        }
+
+        .sense-tab[aria-pressed="true"] {
+            color: #fff;
+            background: #6251a0;
+            border-color: #6251a0;
+            box-shadow: 0 8px 18px #6251a02b;
+        }
+
+        .sense-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .sense-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .panel {
+            min-height: 430px;
+            padding: clamp(24px, 5vw, 44px);
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #eeebf5;
+            border-radius: 28px;
+            box-shadow: 0 18px 60px #33265b0c;
+        }
+
+        .sense-page[hidden] {
+            display: none;
+        }
+
+        .sense-page {
+            animation: fade-in 240ms ease-out both;
+        }
+
+        .sense-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 26px;
+        }
+
+        .heading-icon {
+            display: grid;
+            width: 52px;
+            height: 52px;
+            flex: 0 0 52px;
+            place-items: center;
+            background: #f0edfc;
+            border-radius: 17px;
+            font-size: 1.6rem;
+        }
+
+        h2 {
+            margin-bottom: 6px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.7rem, 4vw, 2.25rem);
+            font-weight: 500;
+            letter-spacing: -0.035em;
+        }
+
+        .sense-heading p,
+        .demo-note {
+            margin-bottom: 0;
+            color: #777487;
+            line-height: 1.65;
+        }
+
+        .demo-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(230px, 0.82fr);
+            align-items: center;
+            gap: 28px;
+        }
+
+        .demo-box {
+            display: grid;
+            min-height: 235px;
+            place-items: center;
+            padding: 20px;
+            overflow: hidden;
+            background: #f6f4fb;
+            border: 1px solid #ece9f4;
+            border-radius: 22px;
+            transition: background 250ms ease;
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .choice {
+            min-height: 42px;
+            padding: 10px 15px;
+            background: #fff;
+            border: 1px solid #dedbe9;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+        }
+
+        .choice:hover {
+            transform: translateY(-1px);
+            border-color: #9889cf;
+        }
+
+        .choice[aria-pressed="true"] {
+            color: #fff;
+            background: #6251a0;
+            border-color: #6251a0;
+        }
+
+        .demo-note {
+            min-height: 52px;
+            margin: 16px 0 0;
+            font-size: 0.94rem;
+        }
+
+        button:focus-visible {
+            outline: 3px solid #a48fe7;
+            outline-offset: 3px;
+        }
+
+        .sight-scene {
+            position: relative;
+            display: grid;
+            width: min(100%, 350px);
+            height: 190px;
+            place-items: center;
+            overflow: hidden;
+            background: linear-gradient(160deg, #cce8ff, #f8d9ef 62%, #f6e5c4);
+            border-radius: 18px;
+            transition: filter 240ms ease;
+        }
+
+        .sight-sun {
+            position: absolute;
+            top: 22px;
+            right: 42px;
+            width: 42px;
+            height: 42px;
+            background: #fff1a8;
+            border-radius: 50%;
+            box-shadow: 0 0 35px #fff1a899;
+        }
+
+        .sight-hill {
+            position: absolute;
+            right: -15%;
+            bottom: -48%;
+            left: -15%;
+            height: 125%;
+            background: linear-gradient(135deg, #93cbb5, #718ac1);
+            border-radius: 50% 50% 0 0;
+        }
+
+        .sight-hill::after {
+            position: absolute;
+            top: 18px;
+            left: -8%;
+            width: 80%;
+            height: 100%;
+            background: linear-gradient(130deg, #b9d591, #79b89c);
+            border-radius: 50%;
+            content: "";
+        }
+
+        .sight-scene[data-view="warm"] {
+            filter: sepia(0.55) saturate(1.2);
+        }
+
+        .sight-scene[data-view="cool"] {
+            filter: hue-rotate(35deg) saturate(0.85);
+        }
+
+        .sight-scene[data-view="night"] {
+            filter: brightness(0.55) saturate(0.8) hue-rotate(18deg);
+        }
+
+        .sound-orb {
+            width: 84px;
+            height: 84px;
+            background: radial-gradient(circle at 35% 30%, #fff, #b7a4f0 38%, #7461ba);
+            border-radius: 50%;
+            box-shadow: 0 0 0 14px #9b88da22, 0 0 0 28px #9b88da12;
+        }
+
+        .sound-orb.playing {
+            animation: sound-wave 650ms ease-out infinite;
+        }
+
+        .smell-art {
+            display: grid;
+            width: min(100%, 330px);
+            height: 180px;
+            place-items: center;
+            border-radius: 18px;
+            background: #e8f5e8;
+            transition: background 250ms ease;
+        }
+
+        .smell-emoji {
+            font-size: 5.2rem;
+            filter: drop-shadow(0 10px 8px #00000012);
+            animation: float 2.8s ease-in-out infinite;
+        }
+
+        .taste-plate {
+            display: grid;
+            width: 150px;
+            height: 150px;
+            place-items: center;
+            background: #fff;
+            border: 12px solid #e8e5ee;
+            border-radius: 50%;
+            box-shadow: 0 15px 25px #34234c16;
+            font-size: 4.2rem;
+            transition: background 200ms ease, transform 200ms ease;
+        }
+
+        .taste-plate.pop {
+            transform: scale(1.06);
+        }
+
+        .touch-swatch {
+            display: grid;
+            width: min(100%, 330px);
+            height: 175px;
+            place-items: center;
+            background-color: #f1dbc5;
+            background-image: repeating-linear-gradient(45deg, #d6bd9c66 0 2px, transparent 2px 9px);
+            border: 1px solid #ddc9ae;
+            border-radius: 20px;
+            color: #735d4d;
+            font-size: 1.1rem;
+            font-weight: 700;
+            transition: background 220ms ease, color 220ms ease;
+        }
+
+        .touch-swatch[data-texture="silk"] {
+            color: #695c9b;
+            background-color: #e8ddff;
+            background-image: repeating-linear-gradient(120deg, #ffffff77 0 2px, transparent 2px 10px);
+            border-color: #cfc0ef;
+        }
+
+        .touch-swatch[data-texture="bumpy"] {
+            color: #64503b;
+            background-color: #f3d9ae;
+            background-image: radial-gradient(#bf9256 18%, transparent 20%);
+            background-size: 18px 18px;
+        }
+
+        .touch-swatch[data-texture="soft"] {
+            color: #995872;
+            background-color: #ffe3ed;
+            background-image: radial-gradient(ellipse, #fff8 10%, transparent 55%);
+            background-size: 25px 20px;
+            border-color: #f1cad9;
+        }
+
+        .balance-scene {
+            display: grid;
+            width: min(100%, 330px);
+            height: 190px;
+            align-content: center;
+            justify-items: center;
+            gap: 14px;
+            background: linear-gradient(#edf4ff 0 72%, #d9e8d1 72%);
+            border-radius: 18px;
+            transition: transform 220ms ease;
+        }
+
+        .balance-person {
+            font-size: 4rem;
+            transform-origin: center bottom;
+            transition: transform 220ms ease;
+        }
+
+        .balance-beam {
+            width: 100px;
+            height: 7px;
+            background: #8d744c;
+            border-radius: 99px;
+            transition: transform 220ms ease;
+        }
+
+        .body-map {
+            position: relative;
+            display: grid;
+            width: min(100%, 330px);
+            height: 190px;
+            place-items: center;
+            overflow: hidden;
+            background: #f3efff;
+            border-radius: 18px;
+        }
+
+        .body-target {
+            position: absolute;
+            right: 25px;
+            bottom: 24px;
+            width: 50px;
+            height: 50px;
+            border: 2px dashed #a99bd4;
+            border-radius: 50%;
+        }
+
+        .body-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            background: #715bc0;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 3px 12px #6251a055;
+            transform: translate(-50%, -50%);
+            transition: left 120ms ease, top 120ms ease, background 150ms ease;
+        }
+
+        .body-map.complete .body-dot {
+            background: #42a47c;
+        }
+
+        .direction-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 42px);
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .direction-pad button {
+            min-height: 38px;
+            background: #f4f1fb;
+            border: 1px solid #e2ddf0;
+            border-radius: 11px;
+            cursor: pointer;
+        }
+
+        .direction-pad .up {
+            grid-column: 2;
+        }
+
+        .direction-pad .left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .direction-pad .down {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .direction-pad .right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .footer {
+            margin: 18px 0 0;
+            color: #888598;
+            font-size: 0.86rem;
+            text-align: center;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            50% { transform: translateY(-7px) rotate(3deg); }
+        }
+
+        @keyframes sound-wave {
+            50% { transform: scale(1.18); box-shadow: 0 0 0 22px #9b88da22, 0 0 0 42px #9b88da12; }
+        }
+
+        @media (max-width: 760px) {
+            .page {
+                padding: 34px 18px 52px;
+            }
+
+            .sense-list {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .sense-tab {
+                min-height: 76px;
+            }
+
+            .demo-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .demo-box {
+                min-height: 210px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .count {
+                text-align: left;
+            }
+
+            .sense-list {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 7px;
+            }
+
+            .sense-name {
+                font-size: 0.72rem;
+            }
+
+            .panel {
+                padding: 22px 18px;
+                border-radius: 22px;
+            }
+
+            .sense-heading {
+                gap: 12px;
+            }
+
+            .heading-icon {
+                width: 44px;
+                height: 44px;
+                flex-basis: 44px;
+                border-radius: 14px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">A tiny interactive science museum</p>
+                <h1>Meet your<br>seven senses.</h1>
+                <p class="hero-copy">
+                    We use more than five senses to explore the world. Pick one below,
+                    try its little demo, and notice how each sense gives you different information.
+                </p>
+            </div>
+            <p class="count"><strong>07</strong><br>ways to explore</p>
+        </header>
+
+        <nav class="sense-list" aria-label="Choose a sense">
+            <button class="sense-tab" type="button" data-sense="sight" aria-pressed="true"><span class="sense-icon" aria-hidden="true">👁️</span><span class="sense-name">Sight</span></button>
+            <button class="sense-tab" type="button" data-sense="hearing" aria-pressed="false"><span class="sense-icon" aria-hidden="true">👂</span><span class="sense-name">Hearing</span></button>
+            <button class="sense-tab" type="button" data-sense="smell" aria-pressed="false"><span class="sense-icon" aria-hidden="true">👃</span><span class="sense-name">Smell</span></button>
+            <button class="sense-tab" type="button" data-sense="taste" aria-pressed="false"><span class="sense-icon" aria-hidden="true">👅</span><span class="sense-name">Taste</span></button>
+            <button class="sense-tab" type="button" data-sense="touch" aria-pressed="false"><span class="sense-icon" aria-hidden="true">✋</span><span class="sense-name">Touch</span></button>
+            <button class="sense-tab" type="button" data-sense="balance" aria-pressed="false"><span class="sense-icon" aria-hidden="true">🧍</span><span class="sense-name">Balance</span></button>
+            <button class="sense-tab" type="button" data-sense="body" aria-pressed="false"><span class="sense-icon" aria-hidden="true">🧭</span><span class="sense-name">Body awareness</span></button>
+        </nav>
+
+        <section class="panel" aria-live="polite">
+            <article class="sense-page" data-page="sight">
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">👁️</span>
+                    <div><h2>Sight · noticing light and color</h2><p>Your eyes help you spot shapes, color, brightness, and movement.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box">
+                        <div class="sight-scene" data-view="day" role="img" aria-label="A colorful landscape under the sun">
+                            <span class="sight-sun"></span><span class="sight-hill"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="demo-controls" aria-label="Change the way the scene looks">
+                            <button class="choice" type="button" data-view-choice="day" aria-pressed="true">☀️ Daylight</button>
+                            <button class="choice" type="button" data-view-choice="warm" aria-pressed="false">🌅 Warm</button>
+                            <button class="choice" type="button" data-view-choice="cool" aria-pressed="false">🧊 Cool</button>
+                            <button class="choice" type="button" data-view-choice="night" aria-pressed="false">🌙 Dim light</button>
+                        </div>
+                        <p class="demo-note" data-output="sight" aria-live="polite">In daylight, colors and details are easy to see.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="sense-page" data-page="hearing" hidden>
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">👂</span>
+                    <div><h2>Hearing · noticing sound</h2><p>Your ears detect vibrations and help you notice pitch and rhythm.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box"><div class="sound-orb" data-orb aria-hidden="true"></div></div>
+                    <div>
+                        <div class="demo-controls" aria-label="Play different notes">
+                            <button class="choice" type="button" data-tone="220">Play low note</button>
+                            <button class="choice" type="button" data-tone="440">Play middle note</button>
+                            <button class="choice" type="button" data-tone="660">Play high note</button>
+                        </div>
+                        <p class="demo-note" data-output="hearing" aria-live="polite">Choose a note to hear a short tone. Turn your volume down if needed.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="sense-page" data-page="smell" hidden>
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">👃</span>
+                    <div><h2>Smell · noticing scents</h2><p>Your nose picks up scent molecules and helps you recognize familiar things.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box"><div class="smell-art" data-smell-art><span class="smell-emoji" data-smell-emoji aria-hidden="true">🌹</span></div></div>
+                    <div>
+                        <div class="demo-controls" aria-label="Explore scent examples">
+                            <button class="choice" type="button" data-smell="flower" aria-pressed="true">🌹 Flower</button>
+                            <button class="choice" type="button" data-smell="citrus" aria-pressed="false">🍋 Citrus</button>
+                            <button class="choice" type="button" data-smell="rain" aria-pressed="false">🌧️ Rain</button>
+                        </div>
+                        <p class="demo-note" data-output="smell" aria-live="polite">A flower can have a sweet, soft scent. This screen shows examples; it cannot produce a real smell.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="sense-page" data-page="taste" hidden>
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">👅</span>
+                    <div><h2>Taste · noticing flavors</h2><p>Your taste buds help distinguish flavors, while smell adds lots of detail.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box"><div class="taste-plate" data-plate aria-hidden="true">🍓</div></div>
+                    <div>
+                        <div class="demo-controls" aria-label="Explore taste examples">
+                            <button class="choice" type="button" data-taste="sweet" aria-pressed="true">Sweet</button>
+                            <button class="choice" type="button" data-taste="sour" aria-pressed="false">Sour</button>
+                            <button class="choice" type="button" data-taste="salty" aria-pressed="false">Salty</button>
+                            <button class="choice" type="button" data-taste="bitter" aria-pressed="false">Bitter</button>
+                            <button class="choice" type="button" data-taste="savory" aria-pressed="false">Savory</button>
+                        </div>
+                        <p class="demo-note" data-output="taste" aria-live="polite">Sweet flavors are often found in ripe fruit and desserts.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="sense-page" data-page="touch" hidden>
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">✋</span>
+                    <div><h2>Touch · noticing texture</h2><p>Skin senses can tell you about texture, pressure, and temperature.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box"><div class="touch-swatch" data-swatch data-texture="rough">Rough like tree bark</div></div>
+                    <div>
+                        <div class="demo-controls" aria-label="Explore textures">
+                            <button class="choice" type="button" data-texture-choice="rough" aria-pressed="true">🌳 Rough</button>
+                            <button class="choice" type="button" data-texture-choice="silk" aria-pressed="false">🧣 Smooth</button>
+                            <button class="choice" type="button" data-texture-choice="bumpy" aria-pressed="false">🪨 Bumpy</button>
+                            <button class="choice" type="button" data-texture-choice="soft" aria-pressed="false">☁️ Soft</button>
+                        </div>
+                        <p class="demo-note" data-output="touch" aria-live="polite">The patterns are visual examples of texture. A screen cannot recreate the feeling on your skin.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="sense-page" data-page="balance" hidden>
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">🧍</span>
+                    <div><h2>Balance · knowing which way is up</h2><p>Your inner ear helps your brain sense movement and keep you upright.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box"><div class="balance-scene" data-balance-scene><span class="balance-person" data-balance-person aria-hidden="true">🧍</span><span class="balance-beam" data-balance-beam></span></div></div>
+                    <div>
+                        <div class="demo-controls" aria-label="Tilt the balance demo">
+                            <button class="choice" type="button" data-balance="left">↶ Tilt left</button>
+                            <button class="choice" type="button" data-balance="level">◎ Level</button>
+                            <button class="choice" type="button" data-balance="right">Tilt right ↷</button>
+                        </div>
+                        <p class="demo-note" data-output="balance" aria-live="polite">Try tilting the scene, then bring it back to level. Your inner ear does this kind of sensing as you move.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="sense-page" data-page="body" hidden>
+                <div class="sense-heading">
+                    <span class="heading-icon" aria-hidden="true">🧭</span>
+                    <div><h2>Body awareness · sensing where you are</h2><p>Proprioception helps you know where your body parts are without looking.</p></div>
+                </div>
+                <div class="demo-layout">
+                    <div class="demo-box"><div class="body-map" data-body-map role="img" aria-label="Move the dot into the target using the arrow keys or direction pad"><span class="body-target"></span><span class="body-dot" data-body-dot></span></div></div>
+                    <div>
+                        <p class="demo-note" data-output="body" aria-live="polite">Move the dot into the target. Use the arrow buttons or your keyboard arrow keys.</p>
+                        <div class="direction-pad" aria-label="Move the dot">
+                            <button class="up" type="button" data-move="up" aria-label="Move up">↑</button>
+                            <button class="left" type="button" data-move="left" aria-label="Move left">←</button>
+                            <button class="down" type="button" data-move="down" aria-label="Move down">↓</button>
+                            <button class="right" type="button" data-move="right" aria-label="Move right">→</button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+        <p class="footer">A screen can show, play, and guide a demo — but smell, taste, and touch are best explored in real life.</p>
+    </main>
+
+    <script>
+        const tabs = [...document.querySelectorAll(".sense-tab")];
+        const pages = [...document.querySelectorAll(".sense-page")];
+        const panel = document.querySelector(".panel");
+
+        function showSense(name) {
+            for (const tab of tabs) {
+                tab.setAttribute("aria-pressed", String(tab.dataset.sense === name));
+            }
+            for (const page of pages) {
+                page.hidden = page.dataset.page !== name;
+            }
+        }
+
+        for (const tab of tabs) {
+            tab.addEventListener("click", () => showSense(tab.dataset.sense));
+        }
+
+        panel.addEventListener("click", async (event) => {
+            const button = event.target.closest("button");
+            if (!button) return;
+
+            if (button.dataset.viewChoice) {
+                const scene = panel.querySelector(".sense-page:not([hidden]) .sight-scene");
+                scene.dataset.view = button.dataset.viewChoice;
+                for (const choice of panel.querySelectorAll("[data-view-choice]")) {
+                    choice.setAttribute("aria-pressed", String(choice === button));
+                }
+                const descriptions = {
+                    day: "In daylight, colors and details are easy to see.",
+                    warm: "A warm light changes how the colors in the same scene appear.",
+                    cool: "Cool light shifts the scene toward blue and violet tones.",
+                    night: "In dim light, the scene looks darker and some details are harder to see."
+                };
+                panel.querySelector('[data-output="sight"]').textContent = descriptions[button.dataset.viewChoice];
+            }
+
+            if (button.dataset.tone) {
+                const output = panel.querySelector('[data-output="hearing"]');
+                const orb = panel.querySelector("[data-orb]");
+                try {
+                    const AudioContextType = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextType) throw new Error("Audio is not supported by this browser.");
+                    const audio = new AudioContextType();
+                    const oscillator = audio.createOscillator();
+                    const gain = audio.createGain();
+                    oscillator.type = "sine";
+                    oscillator.frequency.value = Number(button.dataset.tone);
+                    gain.gain.setValueAtTime(0.08, audio.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.45);
+                    oscillator.connect(gain);
+                    gain.connect(audio.destination);
+                    oscillator.start();
+                    oscillator.stop(audio.currentTime + 0.45);
+                    orb.classList.add("playing");
+                    output.textContent = `Playing a ${button.dataset.tone} Hz tone. Try another pitch and hear the difference.`;
+                    window.setTimeout(() => orb.classList.remove("playing"), 700);
+                    oscillator.addEventListener("ended", () => audio.close());
+                } catch (error) {
+                    output.textContent = `Couldn't play the tone: ${error.message}`;
+                }
+            }
+
+            if (button.dataset.smell) {
+                const examples = {
+                    flower: ["🌹", "#e8f5e8", "A flower can have a sweet, soft scent. This screen shows examples; it cannot produce a real smell."],
+                    citrus: ["🍋", "#fff4d8", "Citrus fruits often smell bright and fresh. This screen shows examples; it cannot produce a real smell."],
+                    rain: ["🌧️", "#e5effb", "Rain can leave a fresh, earthy scent. This screen shows examples; it cannot produce a real smell."]
+                };
+                const [emoji, color, description] = examples[button.dataset.smell];
+                panel.querySelector("[data-smell-emoji]").textContent = emoji;
+                panel.querySelector("[data-smell-art]").style.background = color;
+                panel.querySelector('[data-output="smell"]').textContent = description;
+                for (const choice of panel.querySelectorAll("[data-smell]")) {
+                    choice.setAttribute("aria-pressed", String(choice === button));
+                }
+            }
+
+            if (button.dataset.taste) {
+                const examples = {
+                    sweet: ["🍓", "Sweet flavors are often found in ripe fruit and desserts.", "#fff1f4"],
+                    sour: ["🍋", "Sour flavors, like lemon, make your mouth notice a sharp tang.", "#fff8d9"],
+                    salty: ["🥨", "Salty flavors come from salt in foods such as pretzels.", "#f5f0e5"],
+                    bitter: ["🍫", "Bitter flavors can be found in dark chocolate and some greens.", "#eee6df"],
+                    savory: ["🍄", "Savory, or umami, is a rich flavor found in foods like mushrooms.", "#edf3e6"]
+                };
+                const [emoji, description, color] = examples[button.dataset.taste];
+                const plate = panel.querySelector("[data-plate]");
+                plate.textContent = emoji;
+                plate.style.background = color;
+                plate.classList.remove("pop");
+                requestAnimationFrame(() => plate.classList.add("pop"));
+                panel.querySelector('[data-output="taste"]').textContent = description;
+                for (const choice of panel.querySelectorAll("[data-taste]")) {
+                    choice.setAttribute("aria-pressed", String(choice === button));
+                }
+            }
+
+            if (button.dataset.textureChoice) {
+                const descriptions = {
+                    rough: "Rough surfaces have an uneven feel, like tree bark. The pattern is a visual example only.",
+                    silk: "Smooth surfaces have very little texture, like a piece of silk. The pattern is a visual example only.",
+                    bumpy: "Bumpy surfaces have raised spots you can feel. The pattern is a visual example only.",
+                    soft: "Soft things give way when gently pressed. The pattern is a visual example only."
+                };
+                const texture = button.dataset.textureChoice;
+                const labels = { rough: "Rough like tree bark", silk: "Smooth like silk", bumpy: "Bumpy like small stones", soft: "Soft like a cloud" };
+                const swatch = panel.querySelector("[data-swatch]");
+                swatch.dataset.texture = texture;
+                swatch.textContent = labels[texture];
+                panel.querySelector('[data-output="touch"]').textContent = descriptions[texture];
+                for (const choice of panel.querySelectorAll("[data-texture-choice]")) {
+                    choice.setAttribute("aria-pressed", String(choice === button));
+                }
+            }
+
+            if (button.dataset.balance) {
+                const tilt = button.dataset.balance;
+                const angle = tilt === "left" ? -12 : tilt === "right" ? 12 : 0;
+                panel.querySelector("[data-balance-person]").style.transform = `rotate(${angle}deg)`;
+                panel.querySelector("[data-balance-beam]").style.transform = `rotate(${-angle}deg)`;
+                panel.querySelector('[data-output="balance"]').textContent = tilt === "level"
+                    ? "The scene is level again. Your inner ear also helps you sense when your head is upright."
+                    : `The scene is tilted ${tilt}. Your balance system helps your brain notice movement and stay steady.`;
+            }
+
+            if (button.dataset.move) {
+                moveBodyDot(button.dataset.move);
+            }
+        });
+
+        let bodyPosition = { x: 50, y: 50 };
+        function moveBodyDot(direction) {
+            const step = 8;
+            if (direction === "left") bodyPosition.x = Math.max(8, bodyPosition.x - step);
+            if (direction === "right") bodyPosition.x = Math.min(92, bodyPosition.x + step);
+            if (direction === "up") bodyPosition.y = Math.max(8, bodyPosition.y - step);
+            if (direction === "down") bodyPosition.y = Math.min(92, bodyPosition.y + step);
+            const dot = document.querySelector("[data-body-dot]");
+            const map = document.querySelector("[data-body-map]");
+            dot.style.left = `${bodyPosition.x}%`;
+            dot.style.top = `${bodyPosition.y}%`;
+            const reached = bodyPosition.x >= 76 && bodyPosition.y >= 72;
+            map.classList.toggle("complete", reached);
+            panel.querySelector('[data-output="body"]').textContent = reached
+                ? "You found the target! Body awareness helps guide movement even when you aren't watching every step."
+                : "Keep going — your brain keeps track of the dot's position as you move it.";
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (document.querySelector('[data-page="body"]:not([hidden])')) {
+                const directions = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" };
+                if (directions[event.key]) {
+                    if (event.target instanceof HTMLElement && event.target.closest("button")) return;
+                    event.preventDefault();
+                    moveBodyDot(directions[event.key]);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

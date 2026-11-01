@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f8f6f1">
+    <title>Little Stories — Your blog studio</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+            color: #30362e;
+            background: #f8f6f1;
+            font-synthesis: none;
+            text-rendering: optimizeLegibility;
+            --page: #f8f6f1;
+            --paper: #fffefa;
+            --ink: #30362e;
+            --muted: #788074;
+            --accent: #527a5b;
+            --accent-soft: #e8efe6;
+            --line: #e8e7df;
+            --shadow: 0 16px 46px rgba(48, 54, 46, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            background: var(--page);
+            color: var(--ink);
+            transition: background-color 180ms ease, color 180ms ease;
+        }
+
+        body[data-theme="lavender"] {
+            --page: #f5f1fb;
+            --paper: #fff;
+            --ink: #403553;
+            --muted: #81768f;
+            --accent: #8164aa;
+            --accent-soft: #eee8f8;
+            --line: #e9e1f1;
+            --shadow: 0 16px 46px rgba(76, 52, 104, 0.09);
+        }
+
+        body[data-theme="sunshine"] {
+            --page: #fff8e9;
+            --paper: #fffefa;
+            --ink: #4a3c2b;
+            --muted: #8c7960;
+            --accent: #bd7b32;
+            --accent-soft: #fff0d6;
+            --line: #efe3ce;
+            --shadow: 0 16px 46px rgba(107, 76, 35, 0.08);
+        }
+
+        body[data-theme="berry"] {
+            --page: #fbf1f5;
+            --paper: #fffdfd;
+            --ink: #49343e;
+            --muted: #8b7480;
+            --accent: #b34f79;
+            --accent-soft: #f8e6ee;
+            --line: #efdee6;
+            --shadow: 0 16px 46px rgba(112, 47, 76, 0.08);
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            color: inherit;
+        }
+
+        .topbar {
+            position: sticky;
+            z-index: 5;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            min-height: 72px;
+            padding: 12px clamp(18px, 5vw, 72px);
+            background: color-mix(in srgb, var(--paper) 93%, transparent);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(14px);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            color: var(--ink);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            background: var(--accent-soft);
+            border-radius: 13px;
+            font-family: sans-serif;
+            font-size: 1.15rem;
+        }
+
+        .topbar-right,
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .top-nav a {
+            color: var(--muted);
+            font-size: 0.88rem;
+            font-weight: 650;
+            text-decoration: none;
+        }
+
+        .top-nav a:hover,
+        .top-nav a:focus-visible {
+            color: var(--accent);
+        }
+
+        .save-status {
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .save-status.is-error {
+            color: #b23c3c;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+            gap: clamp(24px, 4vw, 56px);
+            width: min(1320px, 100%);
+            margin: 0 auto;
+            padding: 42px clamp(18px, 5vw, 72px) 72px;
+        }
+
+        .sidebar {
+            align-self: start;
+            position: sticky;
+            top: 98px;
+            display: grid;
+            gap: 28px;
+        }
+
+        .sidebar-section {
+            min-width: 0;
+        }
+
+        .sidebar-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 0 0 13px;
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 9px;
+        }
+
+        .theme-choice {
+            display: grid;
+            min-height: 62px;
+            padding: 7px 4px;
+            place-items: center;
+            gap: 5px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.65rem;
+        }
+
+        .theme-choice[aria-pressed="true"] {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 17%, transparent);
+        }
+
+        .swatch {
+            width: 23px;
+            height: 23px;
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            border-radius: 50%;
+        }
+
+        .theme-choice[data-theme="sage"] .swatch {
+            background: linear-gradient(135deg, #f8f6f1 50%, #527a5b 50%);
+        }
+
+        .theme-choice[data-theme="lavender"] .swatch {
+            background: linear-gradient(135deg, #f5f1fb 50%, #8164aa 50%);
+        }
+
+        .theme-choice[data-theme="sunshine"] .swatch {
+            background: linear-gradient(135deg, #fff8e9 50%, #bd7b32 50%);
+        }
+
+        .theme-choice[data-theme="berry"] .swatch {
+            background: linear-gradient(135deg, #fbf1f5 50%, #b34f79 50%);
+        }
+
+        .button {
+            display: inline-flex;
+            min-height: 42px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 15px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+        }
+
+        .button:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        a:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+            outline-offset: 2px;
+        }
+
+        .button-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .button-primary:hover {
+            background: color-mix(in srgb, var(--accent) 88%, #000);
+            border-color: color-mix(in srgb, var(--accent) 88%, #000);
+        }
+
+        .button-quiet {
+            min-height: 32px;
+            padding: 5px 9px;
+            font-size: 0.76rem;
+        }
+
+        .post-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .post-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 5px;
+            padding: 4px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+        }
+
+        .post-open {
+            min-width: 0;
+            padding: 9px 8px;
+            overflow: hidden;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            text-align: left;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .post-open[aria-current="true"] {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .post-delete {
+            width: 34px;
+            height: 34px;
+            background: transparent;
+            border: 0;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        .post-delete:hover {
+            background: #fff0f0;
+            color: #b23c3c;
+        }
+
+        .empty-list {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .sidebar-tip {
+            padding: 14px;
+            background: var(--accent-soft);
+            border-radius: 15px;
+            color: var(--ink);
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .studio {
+            min-width: 0;
+        }
+
+        .page-heading {
+            margin: 0 0 6px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 500;
+            letter-spacing: -0.045em;
+        }
+
+        .page-subtitle {
+            margin: 0 0 25px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .editor-card,
+        .preview-card,
+        .gallery-card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+        }
+
+        .editor-card {
+            padding: clamp(18px, 3vw, 30px);
+        }
+
+        .field-label {
+            display: block;
+            margin: 0 0 8px;
+            color: var(--muted);
+            font-size: 0.76rem;
+            font-weight: 750;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .title-input,
+        .body-input,
+        .gif-url-input,
+        .gif-name-input {
+            width: 100%;
+            color: var(--ink);
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 13px;
+        }
+
+        .title-input {
+            min-height: 54px;
+            margin-bottom: 19px;
+            padding: 12px 15px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.18rem;
+        }
+
+        .body-input {
+            min-height: 190px;
+            padding: 15px;
+            resize: vertical;
+            line-height: 1.75;
+        }
+
+        .editor-tools {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 9px;
+            margin-top: 13px;
+        }
+
+        .tool-label {
+            margin-right: 2px;
+            color: var(--muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .sticker-button {
+            min-width: 42px;
+            padding: 7px;
+            font-size: 1.2rem;
+        }
+
+        .gif-insert {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 9px;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .gif-url-input,
+        .gif-name-input {
+            min-height: 42px;
+            padding: 9px 12px;
+            font-size: 0.86rem;
+        }
+
+        .hint {
+            margin: 9px 0 0;
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .editor-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            margin-top: 19px;
+        }
+
+        .preview-section {
+            margin-top: 26px;
+        }
+
+        .section-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.45rem;
+            font-weight: 500;
+        }
+
+        .preview-card {
+            padding: clamp(20px, 4vw, 38px);
+        }
+
+        .preview-title {
+            margin: 0 0 15px;
+            overflow-wrap: anywhere;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.7rem, 4vw, 2.5rem);
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .preview-body {
+            color: color-mix(in srgb, var(--ink) 88%, transparent);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.08rem;
+            line-height: 1.85;
+            overflow-wrap: anywhere;
+        }
+
+        .preview-body p {
+            margin: 0 0 1em;
+        }
+
+        .preview-body .post-gif {
+            display: block;
+            width: min(100%, 460px);
+            max-height: 380px;
+            margin: 17px auto;
+            border-radius: 16px;
+            object-fit: cover;
+        }
+
+        .gif-gallery {
+            margin-top: 72px;
+            padding-top: 31px;
+            border-top: 1px solid var(--line);
+            scroll-margin-top: 96px;
+        }
+
+        .gallery-intro {
+            max-width: 600px;
+            margin: 0 0 20px;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        .gallery-form {
+            display: grid;
+            grid-template-columns: minmax(150px, 0.7fr) minmax(0, 1.5fr) auto;
+            gap: 9px;
+            margin-bottom: 18px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 14px;
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 17px;
+        }
+
+        .gallery-image {
+            display: block;
+            width: 100%;
+            height: 150px;
+            background: var(--accent-soft);
+            object-fit: cover;
+        }
+
+        .gallery-image.is-broken {
+            visibility: hidden;
+        }
+
+        .gallery-item-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 9px;
+            padding: 10px;
+        }
+
+        .gallery-item-name {
+            min-width: 0;
+            overflow: hidden;
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .gallery-item-actions {
+            display: flex;
+            flex: 0 0 auto;
+            gap: 4px;
+        }
+
+        .gallery-action {
+            width: 34px;
+            height: 34px;
+            background: var(--accent-soft);
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.93rem;
+        }
+
+        .gallery-action:hover {
+            outline: 1px solid var(--accent);
+        }
+
+        .gallery-empty {
+            grid-column: 1 / -1;
+            padding: 28px;
+            color: var(--muted);
+            background: var(--paper);
+            border: 1px dashed var(--line);
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .footer-note {
+            margin: 36px 0 0;
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        @media (max-width: 820px) {
+            .layout {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+
+            .sidebar {
+                position: static;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: start;
+                gap: 20px;
+            }
+
+            .sidebar-tip {
+                display: none;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .topbar {
+                min-height: 62px;
+            }
+
+            .top-nav {
+                gap: 12px;
+            }
+
+            .top-nav a {
+                font-size: 0.78rem;
+            }
+
+            .save-status {
+                display: none;
+            }
+
+            .layout {
+                padding-top: 26px;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .theme-options {
+                max-width: 340px;
+            }
+
+            .gallery-form {
+                grid-template-columns: 1fr;
+            }
+
+            .editor-actions {
+                display: grid;
+                grid-template-columns: 1fr 1.4fr;
+            }
+
+            .editor-actions .button {
+                padding-right: 9px;
+                padding-left: 9px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 9px;
+            }
+
+            .gallery-image {
+                height: 120px;
+            }
+
+            .gallery-item-info {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .gallery-item-actions {
+                align-self: flex-end;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body data-theme="sage">
+    <header class="topbar">
+        <a class="brand" href="#" aria-label="Little Stories home">
+            <span class="brand-mark" aria-hidden="true">✎</span>
+            <span>little stories</span>
+        </a>
+        <div class="topbar-right">
+            <nav class="top-nav" aria-label="Main navigation">
+                <a href="#editor">Write</a>
+                <a href="#gif-gallery">GIF gallery</a>
+            </nav>
+            <span class="save-status" id="save-status" role="status" aria-live="polite">Saved on this device</span>
+        </div>
+    </header>
+
+    <main class="layout">
+        <aside class="sidebar" aria-label="Blog studio settings">
+            <section class="sidebar-section" aria-labelledby="design-heading">
+                <h2 class="sidebar-heading" id="design-heading">Your blog design</h2>
+                <div class="theme-options" role="group" aria-label="Choose a blog design">
+                    <button class="theme-choice" type="button" data-theme="sage" aria-pressed="true">
+                        <span class="swatch" aria-hidden="true"></span><span>Sage</span>
+                    </button>
+                    <button class="theme-choice" type="button" data-theme="lavender" aria-pressed="false">
+                        <span class="swatch" aria-hidden="true"></span><span>Lavender</span>
+                    </button>
+                    <button class="theme-choice" type="button" data-theme="sunshine" aria-pressed="false">
+                        <span class="swatch" aria-hidden="true"></span><span>Sunshine</span>
+                    </button>
+                    <button class="theme-choice" type="button" data-theme="berry" aria-pressed="false">
+                        <span class="swatch" aria-hidden="true"></span><span>Berry</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="sidebar-section" aria-labelledby="posts-heading">
+                <div class="sidebar-heading">
+                    <h2 class="sidebar-heading" id="posts-heading" style="margin: 0">Saved posts</h2>
+                    <button class="button button-quiet" id="new-post-button" type="button">＋ New</button>
+                </div>
+                <div class="post-list" id="post-list"></div>
+            </section>
+
+            <p class="sidebar-tip">Your posts, GIF collection, and chosen design are saved in this browser on this device.</p>
+        </aside>
+
+        <div class="studio">
+            <section id="editor" aria-labelledby="page-heading">
+                <h1 class="page-heading" id="page-heading">Make a little story.</h1>
+                <p class="page-subtitle">Write something lovely, give it a look you love, and make it your own.</p>
+
+                <div class="editor-card">
+                    <label class="field-label" for="post-title">Story title</label>
+                    <input class="title-input" id="post-title" type="text" maxlength="120" placeholder="A little title for your story…">
+
+                    <label class="field-label" for="post-body">Your story</label>
+                    <textarea class="body-input" id="post-body" placeholder="Start writing here. What are you thinking about today?"></textarea>
+
+                    <div class="editor-tools" aria-label="Add a sticker to your story">
+                        <span class="tool-label">Add a sticker</span>
+                        <button class="button sticker-button" type="button" data-sticker="✨" aria-label="Add sparkle sticker">✨</button>
+                        <button class="button sticker-button" type="button" data-sticker="🌼" aria-label="Add flower sticker">🌼</button>
+                        <button class="button sticker-button" type="button" data-sticker="💖" aria-label="Add heart sticker">💖</button>
+                        <button class="button sticker-button" type="button" data-sticker="🦋" aria-label="Add butterfly sticker">🦋</button>
+                        <button class="button sticker-button" type="button" data-sticker="🎈" aria-label="Add balloon sticker">🎈</button>
+                        <button class="button sticker-button" type="button" data-sticker="🍓" aria-label="Add strawberry sticker">🍓</button>
+                    </div>
+
+                    <div class="gif-insert">
+                        <input class="gif-url-input" id="post-gif-url" type="url" inputmode="url" placeholder="Paste a direct GIF link ending in .gif" aria-label="GIF URL to add to your story">
+                        <button class="button" id="insert-gif-button" type="button">＋ Add GIF</button>
+                    </div>
+                    <p class="hint">GIFs you add here appear inside your post. Add more GIFs to your separate collection below.</p>
+
+                    <div class="editor-actions">
+                        <button class="button" id="preview-button" type="button">Preview story ↓</button>
+                        <button class="button button-primary" id="save-post-button" type="button">Save post</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="preview-section" id="story-preview" aria-labelledby="preview-heading">
+                <div class="section-topline">
+                    <h2 class="section-title" id="preview-heading">Live preview</h2>
+                    <span class="save-status">Updates as you write</span>
+                </div>
+                <article class="preview-card">
+                    <h3 class="preview-title" id="preview-title">Your story starts here</h3>
+                    <div class="preview-body" id="preview-body"></div>
+                </article>
+            </section>
+
+            <section class="gif-gallery" id="gif-gallery" aria-labelledby="gallery-heading">
+                <div class="section-topline">
+                    <h2 class="section-title" id="gallery-heading">Your GIF gallery</h2>
+                    <span class="save-status">A little collection of joy</span>
+                </div>
+                <p class="gallery-intro">Keep your favorite GIFs together here, then pop any one of them into a story whenever you like.</p>
+                <form class="gallery-form" id="gallery-form">
+                    <input class="gif-name-input" id="gallery-gif-name" type="text" maxlength="60" placeholder="Give this GIF a name" aria-label="Name for the GIF">
+                    <input class="gif-url-input" id="gallery-gif-url" type="url" inputmode="url" placeholder="Paste a direct GIF link ending in .gif" aria-label="GIF URL for your gallery">
+                    <button class="button button-primary" type="submit">＋ Save GIF</button>
+                </form>
+                <div class="gallery-grid" id="gallery-grid"></div>
+            </section>
+
+            <p class="footer-note">Made for your words, your favorite little details, and all the stories still to come.</p>
+        </div>
+    </main>
+
+    <script>
+        (() => {
+            const STORAGE_KEY = "littleStoriesBlogStudio.v1";
+            const THEMES = ["sage", "lavender", "sunshine", "berry"];
+            const starterGifs = [
+                {
+                    id: "starter-party",
+                    name: "Party time",
+                    url: "https://media.giphy.com/media/feio2yIUMtdqWjRiaF/giphy.gif"
+                },
+                {
+                    id: "starter-celebration",
+                    name: "A little celebration",
+                    url: "https://media.giphy.com/media/3o6fJ1BM7R2EBRDnxK/giphy.gif"
+                },
+                {
+                    id: "starter-sparkle",
+                    name: "A happy moment",
+                    url: "https://media.giphy.com/media/xSlDYEXknFwY4ucrZV/giphy.gif"
+                }
+            ];
+            const emptyState = () => ({
+                theme: "sage",
+                posts: [],
+                gallery: starterGifs.map((gif) => ({ ...gif })),
+                draft: { postId: null, title: "", body: "" }
+            });
+
+            const elements = {
+                status: document.getElementById("save-status"),
+                title: document.getElementById("post-title"),
+                body: document.getElementById("post-body"),
+                postGifUrl: document.getElementById("post-gif-url"),
+                previewTitle: document.getElementById("preview-title"),
+                previewBody: document.getElementById("preview-body"),
+                postList: document.getElementById("post-list"),
+                galleryGrid: document.getElementById("gallery-grid"),
+                galleryForm: document.getElementById("gallery-form"),
+                galleryName: document.getElementById("gallery-gif-name"),
+                galleryUrl: document.getElementById("gallery-gif-url")
+            };
+
+            function readState() {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) {
+                    return emptyState();
+                }
+
+                try {
+                    const saved = JSON.parse(raw);
+                    if (!saved || typeof saved !== "object" || !Array.isArray(saved.posts) || !Array.isArray(saved.gallery)) {
+                        throw new Error("Saved blog data has an unexpected format.");
+                    }
+                    const draft = saved.draft && typeof saved.draft === "object" ? saved.draft : {};
+                    return {
+                        theme: THEMES.includes(saved.theme) ? saved.theme : "sage",
+                        posts: saved.posts.filter((post) =>
+                            post && typeof post.id === "string" && typeof post.title === "string" && typeof post.body === "string"
+                        ),
+                        gallery: saved.gallery.filter((gif) =>
+                            gif && typeof gif.id === "string" && typeof gif.name === "string" && typeof gif.url === "string"
+                        ),
+                        draft: {
+                            postId: typeof draft.postId === "string" ? draft.postId : null,
+                            title: typeof draft.title === "string" ? draft.title : "",
+                            body: typeof draft.body === "string" ? draft.body : ""
+                        }
+                    };
+                } catch (error) {
+                    elements.status.textContent = "Saved data could not be read. Your browser's saved copy was left untouched.";
+                    elements.status.classList.add("is-error");
+                    return emptyState();
+                }
+            }
+
+            let state = readState();
+            let storageError = elements.status.classList.contains("is-error");
+
+            function setStatus(message, isError = false) {
+                elements.status.textContent = message;
+                elements.status.classList.toggle("is-error", isError);
+            }
+
+            function saveState() {
+                if (storageError) {
+                    setStatus("Saving is paused because stored data could not be read.", true);
+                    return;
+                }
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    setStatus("Saved on this device");
+                } catch (error) {
+                    storageError = true;
+                    setStatus("Could not save. Check your browser storage settings.", true);
+                }
+            }
+
+            function makeId() {
+                if (window.crypto && typeof window.crypto.randomUUID === "function") {
+                    return window.crypto.randomUUID();
+                }
+                return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            }
+
+            function isDirectGifUrl(value) {
+                try {
+                    const url = new URL(value.trim());
+                    return url.protocol === "https:" && /\.gif$/i.test(url.pathname);
+                } catch (error) {
+                    return false;
+                }
+            }
+
+            function setTheme(theme) {
+                if (!THEMES.includes(theme)) {
+                    return;
+                }
+                state.theme = theme;
+                document.body.dataset.theme = theme;
+                document.querySelectorAll(".theme-choice").forEach((button) => {
+                    button.setAttribute("aria-pressed", String(button.dataset.theme === theme));
+                });
+                saveState();
+            }
+
+            function syncDraft() {
+                state.draft.title = elements.title.value;
+                state.draft.body = elements.body.value;
+                saveState();
+                renderPreview();
+            }
+
+            function appendBodyText(text) {
+                const start = elements.body.selectionStart;
+                const end = elements.body.selectionEnd;
+                const before = elements.body.value.slice(0, start);
+                const after = elements.body.value.slice(end);
+                elements.body.value = `${before}${text}${after}`;
+                const cursor = start + text.length;
+                elements.body.focus();
+                elements.body.setSelectionRange(cursor, cursor);
+                syncDraft();
+            }
+
+            function addGifToPost(url) {
+                if (!isDirectGifUrl(url)) {
+                    setStatus("Use a direct HTTPS GIF link ending in .gif.", true);
+                    return;
+                }
+                appendBodyText(`\n[[GIF:${url.trim()}]]\n`);
+                elements.postGifUrl.value = "";
+                setStatus("GIF added to your story");
+            }
+
+            function appendSafeText(container, text) {
+                const lines = text.split("\n");
+                lines.forEach((line, index) => {
+                    if (index > 0) {
+                        container.appendChild(document.createElement("br"));
+                    }
+                    container.appendChild(document.createTextNode(line));
+                });
+            }
+
+            function renderBody(container, body) {
+                container.replaceChildren();
+                const gifToken = /\[\[GIF:(https:\/\/[^\]\s]+\.gif(?:\?[^\]\s]*)?)\]\]/gi;
+                let lastIndex = 0;
+                let match;
+                while ((match = gifToken.exec(body)) !== null) {
+                    appendSafeText(container, body.slice(lastIndex, match.index));
+                    if (isDirectGifUrl(match[1])) {
+                        const image = document.createElement("img");
+                        image.className = "post-gif";
+                        image.src = match[1];
+                        image.alt = "GIF added to this story";
+                        image.loading = "lazy";
+                        container.appendChild(image);
+                    } else {
+                        appendSafeText(container, match[0]);
+                    }
+                    lastIndex = gifToken.lastIndex;
+                }
+                appendSafeText(container, body.slice(lastIndex));
+            }
+
+            function renderPreview() {
+                elements.previewTitle.textContent = elements.title.value.trim() || "Your story starts here";
+                renderBody(elements.previewBody, elements.body.value || "Your words will appear here as you write.");
+            }
+
+            function renderPosts() {
+                elements.postList.replaceChildren();
+                if (state.posts.length === 0) {
+                    const empty = document.createElement("p");
+                    empty.className = "empty-list";
+                    empty.textContent = "Your saved stories will show up here.";
+                    elements.postList.appendChild(empty);
+                    return;
+                }
+
+                [...state.posts].reverse().forEach((post) => {
+                    const row = document.createElement("div");
+                    row.className = "post-row";
+                    const openButton = document.createElement("button");
+                    openButton.className = "post-open";
+                    openButton.type = "button";
+                    openButton.textContent = post.title || "Untitled story";
+                    openButton.title = post.title || "Untitled story";
+                    openButton.setAttribute("aria-current", String(state.draft.postId === post.id));
+                    openButton.addEventListener("click", () => loadPost(post.id));
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.className = "post-delete";
+                    deleteButton.type = "button";
+                    deleteButton.textContent = "×";
+                    deleteButton.setAttribute("aria-label", `Delete ${post.title || "untitled story"}`);
+                    deleteButton.addEventListener("click", () => deletePost(post.id));
+
+                    row.append(openButton, deleteButton);
+                    elements.postList.appendChild(row);
+                });
+            }
+
+            function renderGallery() {
+                elements.galleryGrid.replaceChildren();
+                if (state.gallery.length === 0) {
+                    const empty = document.createElement("p");
+                    empty.className = "gallery-empty";
+                    empty.textContent = "Your GIF gallery is empty. Add a GIF above to get started.";
+                    elements.galleryGrid.appendChild(empty);
+                    return;
+                }
+
+                state.gallery.forEach((gif) => {
+                    const card = document.createElement("article");
+                    card.className = "gallery-item";
+                    const image = document.createElement("img");
+                    image.className = "gallery-image";
+                    image.src = gif.url;
+                    image.alt = gif.name;
+                    image.loading = "lazy";
+                    image.addEventListener("error", () => {
+                        image.classList.add("is-broken");
+                        image.alt = `${gif.name} — GIF could not be loaded`;
+                    });
+
+                    const info = document.createElement("div");
+                    info.className = "gallery-item-info";
+                    const name = document.createElement("span");
+                    name.className = "gallery-item-name";
+                    name.textContent = gif.name;
+                    const actions = document.createElement("div");
+                    actions.className = "gallery-item-actions";
+
+                    const insertButton = document.createElement("button");
+                    insertButton.className = "gallery-action";
+                    insertButton.type = "button";
+                    insertButton.textContent = "＋";
+                    insertButton.title = `Add ${gif.name} to the current story`;
+                    insertButton.setAttribute("aria-label", `Add ${gif.name} to the current story`);
+                    insertButton.addEventListener("click", () => {
+                        addGifToPost(gif.url);
+                        document.getElementById("editor").scrollIntoView({ behavior: "smooth" });
+                    });
+
+                    const removeButton = document.createElement("button");
+                    removeButton.className = "gallery-action";
+                    removeButton.type = "button";
+                    removeButton.textContent = "×";
+                    removeButton.title = `Remove ${gif.name} from the gallery`;
+                    removeButton.setAttribute("aria-label", `Remove ${gif.name} from the gallery`);
+                    removeButton.addEventListener("click", () => {
+                        state.gallery = state.gallery.filter((item) => item.id !== gif.id);
+                        saveState();
+                        renderGallery();
+                    });
+
+                    actions.append(insertButton, removeButton);
+                    info.append(name, actions);
+                    card.append(image, info);
+                    elements.galleryGrid.appendChild(card);
+                });
+            }
+
+            function loadPost(postId) {
+                const post = state.posts.find((item) => item.id === postId);
+                if (!post) {
+                    return;
+                }
+                state.draft = { postId: post.id, title: post.title, body: post.body };
+                elements.title.value = post.title;
+                elements.body.value = post.body;
+                renderPosts();
+                renderPreview();
+                saveState();
+                document.getElementById("editor").scrollIntoView({ behavior: "smooth" });
+            }
+
+            function createNewPost() {
+                state.draft = { postId: null, title: "", body: "" };
+                elements.title.value = "";
+                elements.body.value = "";
+                renderPosts();
+                renderPreview();
+                saveState();
+                elements.title.focus();
+                document.getElementById("editor").scrollIntoView({ behavior: "smooth" });
+            }
+
+            function savePost() {
+                const title = elements.title.value.trim();
+                const body = elements.body.value.trim();
+                if (!title && !body) {
+                    setStatus("Add a title or a few words before saving.", true);
+                    elements.title.focus();
+                    return;
+                }
+
+                const now = new Date().toISOString();
+                const existing = state.posts.find((post) => post.id === state.draft.postId);
+                if (existing) {
+                    existing.title = title;
+                    existing.body = body;
+                    existing.updatedAt = now;
+                } else {
+                    const post = { id: makeId(), title, body, updatedAt: now };
+                    state.posts.push(post);
+                    state.draft.postId = post.id;
+                }
+                state.draft.title = title;
+                state.draft.body = body;
+                saveState();
+                renderPosts();
+                setStatus("Post saved on this device");
+            }
+
+            function deletePost(postId) {
+                const post = state.posts.find((item) => item.id === postId);
+                if (!post || !window.confirm(`Delete "${post.title || "Untitled story"}"? This cannot be undone.`)) {
+                    return;
+                }
+                state.posts = state.posts.filter((item) => item.id !== postId);
+                if (state.draft.postId === postId) {
+                    state.draft = { postId: null, title: "", body: "" };
+                    elements.title.value = "";
+                    elements.body.value = "";
+                    renderPreview();
+                }
+                saveState();
+                renderPosts();
+            }
+
+            document.querySelectorAll(".theme-choice").forEach((button) => {
+                button.addEventListener("click", () => setTheme(button.dataset.theme));
+            });
+
+            document.querySelectorAll("[data-sticker]").forEach((button) => {
+                button.addEventListener("click", () => appendBodyText(button.dataset.sticker));
+            });
+
+            elements.title.addEventListener("input", syncDraft);
+            elements.body.addEventListener("input", syncDraft);
+
+            document.getElementById("insert-gif-button").addEventListener("click", () => {
+                addGifToPost(elements.postGifUrl.value);
+            });
+
+            elements.postGifUrl.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    addGifToPost(elements.postGifUrl.value);
+                }
+            });
+
+            document.getElementById("save-post-button").addEventListener("click", savePost);
+            document.getElementById("new-post-button").addEventListener("click", createNewPost);
+            document.getElementById("preview-button").addEventListener("click", () => {
+                document.getElementById("story-preview").scrollIntoView({ behavior: "smooth" });
+            });
+
+            elements.galleryForm.addEventListener("submit", (event) => {
+                event.preventDefault();
+                const name = elements.galleryName.value.trim();
+                const url = elements.galleryUrl.value.trim();
+                if (!name) {
+                    setStatus("Give your GIF a name first.", true);
+                    elements.galleryName.focus();
+                    return;
+                }
+                if (!isDirectGifUrl(url)) {
+                    setStatus("Use a direct HTTPS GIF link ending in .gif.", true);
+                    elements.galleryUrl.focus();
+                    return;
+                }
+                state.gallery.unshift({ id: makeId(), name, url });
+                saveState();
+                renderGallery();
+                elements.galleryForm.reset();
+                setStatus("GIF saved in your gallery");
+            });
+
+            document.body.dataset.theme = state.theme;
+            elements.title.value = state.draft.title;
+            elements.body.value = state.draft.body;
+            document.querySelectorAll(".theme-choice").forEach((button) => {
+                button.setAttribute("aria-pressed", String(button.dataset.theme === state.theme));
+            });
+            renderPosts();
+            renderGallery();
+            renderPreview();
+        })();
+    </script>
+</body>
+</html>
